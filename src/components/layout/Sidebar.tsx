@@ -15,7 +15,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 interface SidebarProps {
@@ -55,6 +54,14 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
     return (
       <NavLink
         to={item.href}
+        onPointerDown={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+          event.preventDefault();
+          console.log(`Sidebar NavItem clicked: ${item.href}`);
+          navigate(item.href);
+        }}
         className={cn(
           "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 w-full text-left",
           "hover:bg-sidebar-accent hover:text-sidebar-foreground",
@@ -74,7 +81,7 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300 flex flex-col",
+        "fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-300 flex flex-col pointer-events-auto",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -107,8 +114,8 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       </button>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 py-4">
-        <nav className="px-3 space-y-1">
+      <div className="flex-1 overflow-y-auto py-4 pointer-events-auto">
+        <nav className="px-3 space-y-1 pointer-events-auto">
           {navigation.map((item) => (
             <NavItem key={item.name} item={item} />
           ))}
@@ -142,7 +149,7 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
             <NavItem key={item.name} item={item} />
           ))}
         </nav>
-      </ScrollArea>
+      </div>
 
       {/* Toggle Button */}
       <div className="p-3 border-t border-sidebar-border">
