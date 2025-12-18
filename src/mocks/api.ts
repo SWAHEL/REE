@@ -17,6 +17,15 @@ import {
 // Simulated delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
+
+const withinRange = (isoDate: string, start: Date, end: Date) => {
+  const date = new Date(isoDate);
+  return date >= start && date <= end;
+};
+
 // Storage keys
 const STORAGE_KEYS = {
   USERS: 'si_releves_users',
@@ -349,13 +358,17 @@ export const dashboardApi = {
       filteredReadings = readingsData.filter(r => meterIds.includes(r.meterId));
     }
     
-    const today = new Date().toISOString().split('T')[0];
-    const todayReadings = filteredReadings.filter(r => r.date.startsWith(today));
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const todayStart = startOfDay(now);
     
-    const metersRead = new Set(filteredReadings.slice(0, 100).map(r => r.meterId)).size;
+    const monthReadings = filteredReadings.filter(r => withinRange(r.date, monthStart, now));
+    const todayReadings = filteredReadings.filter(r => withinRange(r.date, todayStart, now));
     
-    const waterReadings = filteredReadings.filter(r => r.type === 'WATER');
-    const elecReadings = filteredReadings.filter(r => r.type === 'ELECTRICITY');
+    const metersRead = new Set(monthReadings.map(r => r.meterId)).size;
+    
+    const waterReadings = monthReadings.filter(r => r.type === 'WATER');
+    const elecReadings = monthReadings.filter(r => r.type === 'ELECTRICITY');
     
     return {
       totalMeters: filteredMeters.length,
@@ -373,17 +386,29 @@ export const dashboardApi = {
   
   getReadingsPerAgent: async (districtId?: string): Promise<AgentPerformance[]> => {
     await delay(300);
-    const performance: AgentPerformance[] = [];
+    const now = new Date();
+    const windowStart = new Date(now);
+    windowStart.setDate(windowStart.getDate() - 30);
     
-    for (const agent of agentsData) {
-      const count = readingsData.filter(r => r.agentId === agent.id).length;
-      performance.push({
+    let agentScope = agentsData;
+    let filteredReadings = readingsData.filter(r => withinRange(r.date, windowStart, now));
+    
+    if (districtId) {
+      const addressIds = addresses.filter(a => a.districtId === districtId).map(a => a.id);
+      const meterIds = metersData.filter(m => addressIds.includes(m.addressId)).map(m => m.id);
+      filteredReadings = filteredReadings.filter(r => meterIds.includes(r.meterId));
+      agentScope = agentsData.filter(a => a.districtId === districtId);
+    }
+    
+    const performance: AgentPerformance[] = agentScope.map(agent => {
+      const count = filteredReadings.filter(r => r.agentId === agent.id).length;
+      return {
         agentId: agent.id,
         agentName: `${agent.firstName} ${agent.lastName}`,
         readingsCount: count,
-        date: new Date().toISOString().split('T')[0],
-      });
-    }
+        date: now.toISOString().split('T')[0],
+      };
+    });
     
     return performance.sort((a, b) => b.readingsCount - a.readingsCount);
   },

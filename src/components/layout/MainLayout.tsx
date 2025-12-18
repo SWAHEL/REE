@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'; // Add useLocation
+import { useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useInactivityTimer } from '@/hooks/useInactivityTimer';
@@ -13,8 +13,7 @@ export const MainLayout = () => {
     return stored === 'true';
   });
 
-  const navigate = useNavigate();
-  const location = useLocation(); // Add this
+  const location = useLocation();
   useInactivityTimer();
 
   const handleToggleSidebar = () => {
@@ -22,11 +21,6 @@ export const MainLayout = () => {
     setSidebarCollapsed(newValue);
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newValue));
   };
-
-  const [layoutId] = useState(() => Math.random().toString(36).substr(2, 9));
-  
-  console.log(`MainLayout [${layoutId}] rendering, sidebar collapsed:`, sidebarCollapsed);
-  console.log(`MainLayout - Current path:`, location.pathname); // Log current path
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,10 +34,6 @@ export const MainLayout = () => {
         )}
       >
         <div className="p-6">
-          {/* Add a debug div */}
-          <div className="mb-4 p-2 bg-yellow-100 text-yellow-800 text-sm rounded">
-            Debug: Current route: {location.pathname} | Outlet should render below:
-          </div>
           <Outlet />
         </div>
       </main>

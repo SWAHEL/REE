@@ -41,8 +41,6 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   
   const currentPath = location.pathname;
 
-  console.log("Sidebar - Current path:", currentPath);
-
   const NavItem = ({ item }: { item: { name: string; href: string; icon: any } }) => {
     const Icon = item.icon;
     
@@ -59,7 +57,6 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
             return;
           }
           event.preventDefault();
-          console.log(`Sidebar NavItem clicked: ${item.href}`);
           navigate(item.href);
         }}
         className={cn(
@@ -89,7 +86,6 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       <button
         type="button"
         onClick={() => {
-          console.log("Logo clicked");
           navigate("/dashboard");
         }}
         className={cn(

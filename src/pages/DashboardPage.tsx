@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { dashboardApi, districtsApi, agentsApi } from '@/mocks/api';
+import { dashboardApi, districtsApi } from '@/mocks/api';
 import { DashboardStats, District, ConsumptionTrend, AgentPerformance } from '@/types';
 import { 
   Gauge, 
